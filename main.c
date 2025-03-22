@@ -34,7 +34,7 @@ int INPUT_get_progress(void) {
 int INPUT_new_task(int id[], char list[][MAX_TITLE], int progress[], int *list_length) {
 	if (*list_length == MAX_TASK) return 0;
 
-	printf("\t\nYour task: ");
+	printf("\n\tYour task: ");
 	scanf("%49s", list[*list_length]);
 	while (getchar() != '\n');
 	progress[*list_length] = INPUT_get_progress();
@@ -46,7 +46,7 @@ int INPUT_get_ID(int list_length) {
 	int is_valid = 0;
 	int id;
 	while (!is_valid) {
-		printf("\t\nYour task's ID: ");
+		printf("\n\tYour task's ID: ");
 		scanf("%d", &id);
 		is_valid = (id >= 0 && id <= list_length);
 		if (is_valid) return id;
@@ -66,7 +66,7 @@ int SYSTEM_delete_task(int id[], char list[][MAX_TITLE], int progress[], int *li
 }
 
 int SYSTEM_edit_task(char list[][MAX_TITLE], int progress[], int ID) {
-	printf("\t\nYour task: ");
+	printf("\n\tYour task: ");
 	scanf("%49s", list[ID]);
 	while (getchar() != '\n');
 	progress[ID] = INPUT_get_progress();
@@ -98,39 +98,41 @@ int main() {
 	int list_length = 0;
 	int option, ID, signal;
 
-	printf("\nTO DO LIST");
-    printf("\nPlease select an option:");
-    printf("\n1. Add a task");
-    printf("\n2. Edit a task");
-    printf("\n3. Delete a task");
-    printf("\n4. View all task");
-    printf("\n0. Exit");
-    printf("\n");
+	while (1) {
+		printf("\nTO DO LIST");
+		printf("\nPlease select an option:");
+		printf("\n1. Add a task");
+		printf("\n2. Edit a task");
+		printf("\n3. Delete a task");
+		printf("\n4. View all task");
+		printf("\n0. Exit");
+		printf("\n");
 
-	option = INPUT_get_option();
-	printf("Received option: %d", option);
-    printf("\n");
+		option = INPUT_get_option();
+		printf("Received option: %d", option);
+		printf("\n");
 
-	switch (option) {
-		case 1:
-			signal = INPUT_new_task(id, list, progress, &list_length);
-			OUTPUT_response(signal);
-			break;
-		case 2:
-			ID = INPUT_get_ID(list_length);
-			signal = SYSTEM_edit_task(list, progress, ID);
-			OUTPUT_response(signal);
-			break;
-		case 3:
-			ID = INPUT_get_ID(list_length);
-			signal = (id, list, progress, &list_length, ID);
-			OUTPUT_response(signal);
-			break;
-		case 4:
+		switch (option) {
+			case 1:
+				signal = INPUT_new_task(id, list, progress, &list_length);
+				OUTPUT_response(signal);
+				break;
+			case 2:
+				ID = INPUT_get_ID(list_length);
+				signal = SYSTEM_edit_task(list, progress, ID);
+				OUTPUT_response(signal);
+				break;
+			case 3:
+				ID = INPUT_get_ID(list_length);
+				signal = SYSTEM_delete_task(id, list, progress, &list_length, ID);
+				OUTPUT_response(signal);
+				break;
+			case 4:
 
-			break;
-		case 0:
-			return 0;	
+				break;
+			case 0:
+				return 0;	
+		}
 	}
 
 	return 0;

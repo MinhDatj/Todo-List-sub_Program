@@ -20,7 +20,7 @@ int INPUT_get_option(void) {
 	}
 }
 
-int INTPUT_get_progress(void) {
+int INPUT_get_progress(void) {
 	int is_valid = 0;
 	int progress;
 	while (!is_valid) {
@@ -37,7 +37,7 @@ int INPUT_new_task(int id[], char list[][MAX_TITLE], int progress[], int *list_l
 	printf("\t\nYour task: ");
 	scanf("%49s", list[*list_length]);
 	while (getchar() != '\n');
-	progress[*list_length] = INTPUT_get_progress();
+	progress[*list_length] = INPUT_get_progress();
 	(*list_length)++;
 	return ADDING_SUCCEEDED;
 }
@@ -69,7 +69,7 @@ int SYSTEM_edit_task(char list[][MAX_TITLE], int progress[], int ID) {
 	printf("\t\nYour task: ");
 	scanf("%49s", list[ID]);
 	while (getchar() != '\n');
-	progress[ID] = INTPUT_get_progress();
+	progress[ID] = INPUT_get_progress();
 	return EDITED_SUCCEEDED;
 }
 
@@ -79,13 +79,13 @@ void OUTPUT_response(int signal) {
 		switch (signal)
 		{
 		case 1:
-			printf("\nAdded task successfully!");
+			printf("\nTask added successfully!");
 			break;
 		case 2:
-			printf("\nEdited task successfully");
+			printf("\nTask edited successfully");
 			break;
 		case 3:
-			printf("\nDeleted task successfully!");
+			printf("\nTask deleted successfully!");
 			break;
 		}
 	}
@@ -127,7 +127,7 @@ int main() {
 			OUTPUT_response(signal);
 			break;
 		case 4:
-			
+
 			break;
 		case 0:
 			return 0;	

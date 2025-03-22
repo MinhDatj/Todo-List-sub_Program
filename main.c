@@ -35,10 +35,22 @@ int INPUT_new_task(int id[], char list[][MAX_TITLE], int progress[], int *list_l
 	if (*list_length == MAX_TASK) return 0;
 
 	printf("\t\nYour task: ");
-	scanf("%49s%*c", list[*list_length]);
+	scanf("%49s", list[*list_length]);
+	while (getchar() != '\n');
 	progress[*list_length] = INTPUT_get_progress();
 	(*list_length)++;
 	return ADDING_SUCCEEDED;
+}
+
+int INPUT_get_ID(int *list_length) {
+	int is_valid = 0;
+	int id;
+	while (!is_valid) {
+		printf("\t\nYour task's ID: ");
+		scanf("%d", &id);
+		is_valid = (id >= 0 && id <= *list_length);
+		if (is_valid) return id;
+	}
 }
 
 void OUTPUT_response(int signal) {
@@ -80,6 +92,7 @@ int main() {
 		case 2:
 			break;
 		case 3:
+			
 			break;
 		case 4:
 			break;

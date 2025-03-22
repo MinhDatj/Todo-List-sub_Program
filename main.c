@@ -8,6 +8,7 @@
 #define ADDING_SUCCEEDED 1
 #define EDITED_SUCCEEDED 2
 #define DELETING_SUCCEEDED 3
+#define SEARCHING_SUCCEDED 4
 
 int INPUT_get_option(void) {
 	int is_valid = 0;
@@ -91,6 +92,20 @@ void OUTPUT_response(int signal) {
 	}
 }
 
+void OUTPUT_long_printing(char c, int num) {
+	for (int i = 0; i < num; i++) printf("%c", c);
+}
+
+void OUTPUT_view_task(int id[], char list[][MAX_TITLE], int progress[], int list_length) {
+	if (!list_length) printf("\nNo task yet!");
+	else {
+		OUTPUT_long_printing('-', 50);
+		for (int i = 0; i < list_length; i++) {
+			printf("[%d] %s - Progress: %d%%\n", id[i], list[i], progress[i]);
+		}
+	}
+}
+
 int main() {
 	int id[MAX_TASK];
 	char list[MAX_TASK][MAX_TITLE];
@@ -128,7 +143,7 @@ int main() {
 				OUTPUT_response(signal);
 				break;
 			case 4:
-
+				OUTPUT_view_task(id, list, progress, list_length);
 				break;
 			case 0:
 				return 0;	

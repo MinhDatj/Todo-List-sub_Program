@@ -16,6 +16,7 @@ int INPUT_get_option(void) {
 	while (!is_valid) {
 		printf("Your option: ");
 		scanf("%d", &option);
+		while (getchar() != '\n');
 		is_valid = (option >= 0 && option <= LAST_OPTION);
 		if (is_valid) return option;
 	}
@@ -25,7 +26,7 @@ int INPUT_get_progress(void) {
 	int is_valid = 0;
 	int progress;
 	while (!is_valid) {
-		printf("Your progress [0-100]: ");
+		printf("\tYour progress [0-100]: ");
 		scanf("%d", &progress);
 		is_valid = (progress >= 0 && progress <= 100);
 		if (is_valid) return progress;
@@ -35,10 +36,11 @@ int INPUT_get_progress(void) {
 int INPUT_new_task(int id[], char list[][MAX_TITLE], int progress[], int *list_length) {
 	if (*list_length == MAX_TASK) return 0;
 
-	printf("\n\tYour task: ");
-	scanf("%49s", list[*list_length - 1]);
+	printf("\tYour task: ");
+	scanf("%49s", list[*list_length]);
 	while (getchar() != '\n');
-	progress[*list_length - 1] = INPUT_get_progress();
+	progress[*list_length] = INPUT_get_progress();
+	id[*list_length] = *list_length + 1;
 	(*list_length)++;
 	return ADDING_SUCCEEDED;
 }
@@ -49,7 +51,7 @@ int INPUT_get_ID(int list_length) {
 	while (!is_valid) {
 		printf("\n\tYour task's ID: ");
 		scanf("%d", &id);
-		is_valid = (id >= 0 && id <= list_length);
+		is_valid = (id >= 0 && id <= list_length + 1);
 		if (is_valid) return id;
 	}
 }
@@ -67,7 +69,7 @@ int SYSTEM_delete_task(int id[], char list[][MAX_TITLE], int progress[], int *li
 }
 
 int SYSTEM_edit_task(char list[][MAX_TITLE], int progress[], int ID) {
-	printf("\n\tYour task: ");
+	printf("\tYour task: ");
 	scanf("%49s", list[ID]);
 	while (getchar() != '\n');
 	progress[ID - 1] = INPUT_get_progress();
@@ -101,7 +103,7 @@ void OUTPUT_view_task(int id[], char list[][MAX_TITLE], int progress[], int list
 	else {
 		OUTPUT_long_printing('-', 50);
 		for (int i = 0; i < list_length; i++) {
-			printf("[%d] %s - Progress: %d%%\n", id[i], list[i], progress[i]);
+			printf("\n[%d] %s - Progress: %d%%\n", id[i], list[i], progress[i]);
 		}
 	}
 }
@@ -110,7 +112,7 @@ int main() {
 	int id[MAX_TASK];
 	char list[MAX_TASK][MAX_TITLE];
 	int progress[MAX_TASK];
-	int list_length = 1;
+	int list_length = 0;
 	int option, ID, signal;
 
 	while (1) {

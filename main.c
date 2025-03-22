@@ -2,7 +2,7 @@
 #include <stdlib.h>
 #include <string.h>
 
-#define MAX_TITLE 50
+#define MAX_TITLE 51
 #define MAX_TASK 10
 #define LAST_OPTION 4
 #define ADDING_SUCCEEDED 1
@@ -37,7 +37,7 @@ int INPUT_new_task(int id[], char list[][MAX_TITLE], int progress[], int *list_l
 	if (*list_length == MAX_TASK) return 0;
 
 	printf("\tYour task: ");
-	scanf("%49s", list[*list_length]);
+	scanf("%50[^\n]", list[*list_length]);
 	while (getchar() != '\n');
 	progress[*list_length] = INPUT_get_progress();
 	id[*list_length] = *list_length + 1;
@@ -51,6 +51,7 @@ int INPUT_get_ID(int list_length) {
 	while (!is_valid) {
 		printf("\n\tYour task's ID: ");
 		scanf("%d", &id);
+		while (getchar() != '\n');
 		is_valid = (id >= 0 && id <= list_length + 1);
 		if (is_valid) return id;
 	}
@@ -70,7 +71,7 @@ int SYSTEM_delete_task(int id[], char list[][MAX_TITLE], int progress[], int *li
 
 int SYSTEM_edit_task(char list[][MAX_TITLE], int progress[], int ID) {
 	printf("\tYour task: ");
-	scanf("%49s", list[ID]);
+	scanf("%50[^\n]", list[ID - 1]);
 	while (getchar() != '\n');
 	progress[ID - 1] = INPUT_get_progress();
 	return EDITED_SUCCEEDED;
@@ -94,16 +95,15 @@ void OUTPUT_response(int signal) {
 	}
 }
 
-void OUTPUT_long_printing(char c, int num) {
+void OUTPUT_printing_text(char c, int num) {
 	for (int i = 0; i < num; i++) printf("%c", c);
 }
 
 void OUTPUT_view_task(int id[], char list[][MAX_TITLE], int progress[], int list_length) {
 	if (!list_length) printf("\nNo task yet!");
 	else {
-		OUTPUT_long_printing('-', 50);
 		for (int i = 0; i < list_length; i++) {
-			printf("\n[%d] %s - Progress: %d%%\n", id[i], list[i], progress[i]);
+			printf("\n[%d]%7d%% %5s%s", id[i], progress[i], " ", list[i]);
 		}
 	}
 }
@@ -114,14 +114,30 @@ int main() {
 	int progress[MAX_TASK];
 	int list_length = 0;
 	int option, ID, signal;
+	system("clear"); 
 
 	while (1) {
+		if (!list_length) {
+			OUTPUT_view_task(id, list, progress, list_length);
+		} else {
+			printf("\n");
+			OUTPUT_printing_text('=', 68); 
+			printf("\nID    PROGRESS   ");
+			OUTPUT_printing_text(' ', 22);
+			printf("TITLE\n");
+			OUTPUT_printing_text('-', 68);
+			OUTPUT_view_task(id, list, progress, list_length);
+			printf("\n");
+			OUTPUT_printing_text('=', 68); 
+			printf("\n");
+		}
+
 		printf("\nTO DO LIST");
 		printf("\nPlease select an option:");
 		printf("\n1. Add a task");
 		printf("\n2. Edit a task");
 		printf("\n3. Delete a task");
-		printf("\n4. View all task");
+		// printf("\n4. View all task");
 		printf("\n0. Exit");
 		printf("\n");
 
@@ -144,13 +160,13 @@ int main() {
 				signal = SYSTEM_delete_task(id, list, progress, &list_length, ID);
 				OUTPUT_response(signal);
 				break;
-			case 4:
-				OUTPUT_view_task(id, list, progress, list_length);
-				break;
+			// case 4:
+			// 	OUTPUT_view_task(id, list, progress, list_length);
+			// 	break;
 			case 0:
+				system("clear");
 				return 0;	
 		}
+		system("clear"); 
 	}
-
-	return 0;
 }

@@ -6,7 +6,7 @@
 #define MAX_TASK 10
 #define LAST_OPTION 4
 #define ADDING_SUCCEEDED 1
-#define FIXING_SUCCEEDED 2
+#define EDITED_SUCCEEDED 2
 #define DELETING_SUCCEEDED 3
 
 int INPUT_get_option(void) {
@@ -65,16 +65,29 @@ int SYSTEM_delete_task(int id[], char list[][MAX_TITLE], int progress[], int *li
 	return DELETING_SUCCEEDED;
 }
 
+int SYSTEM_edit_task(char list[][MAX_TITLE], int progress[], int ID) {
+	printf("\t\nYour task: ");
+	scanf("%49s", list[ID]);
+	while (getchar() != '\n');
+	progress[ID] = INTPUT_get_progress();
+	return EDITED_SUCCEEDED;
+}
+
 void OUTPUT_response(int signal) {
 	if (!signal) printf("\nFailed!");
-
-	switch (signal)
-	{
-	case 1:
-		printf("\nAdded task successfully!");
-		break;
-	case 3:
-		printf("\nDeleted task successfully!");
+	else {
+		switch (signal)
+		{
+		case 1:
+			printf("\nAdded task successfully!");
+			break;
+		case 2:
+			printf("\nEdited task successfully");
+			break;
+		case 3:
+			printf("\nDeleted task successfully!");
+			break;
+		}
 	}
 }
 
@@ -104,12 +117,17 @@ int main() {
 			OUTPUT_response(signal);
 			break;
 		case 2:
+			ID = INPUT_get_ID(list_length);
+			signal = SYSTEM_edit_task(list, progress, ID);
+			OUTPUT_response(signal);
 			break;
 		case 3:
 			ID = INPUT_get_ID(list_length);
-			SYSTEM_delete_task(id, list, progress, &list_length, ID);
+			signal = (id, list, progress, &list_length, ID);
+			OUTPUT_response(signal);
 			break;
 		case 4:
+			
 			break;
 		case 0:
 			return 0;	

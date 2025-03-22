@@ -36,9 +36,9 @@ int INPUT_new_task(int id[], char list[][MAX_TITLE], int progress[], int *list_l
 	if (*list_length == MAX_TASK) return 0;
 
 	printf("\n\tYour task: ");
-	scanf("%49s", list[*list_length]);
+	scanf("%49s", list[*list_length - 1]);
 	while (getchar() != '\n');
-	progress[*list_length] = INPUT_get_progress();
+	progress[*list_length - 1] = INPUT_get_progress();
 	(*list_length)++;
 	return ADDING_SUCCEEDED;
 }
@@ -58,7 +58,7 @@ int SYSTEM_delete_task(int id[], char list[][MAX_TITLE], int progress[], int *li
 	if (*list_length == MAX_TASK) return 0;
 
 	for (int i = ID - 1; i < *list_length; i++) {
-		id[i] = id[i + 1];
+		// id[i] = id[i + 1];
 		progress[i] = progress[i + 1];
 		strcpy(list[i], list[i + 1]);
 	}
@@ -70,7 +70,7 @@ int SYSTEM_edit_task(char list[][MAX_TITLE], int progress[], int ID) {
 	printf("\n\tYour task: ");
 	scanf("%49s", list[ID]);
 	while (getchar() != '\n');
-	progress[ID] = INPUT_get_progress();
+	progress[ID - 1] = INPUT_get_progress();
 	return EDITED_SUCCEEDED;
 }
 
@@ -110,7 +110,7 @@ int main() {
 	int id[MAX_TASK];
 	char list[MAX_TASK][MAX_TITLE];
 	int progress[MAX_TASK];
-	int list_length = 0;
+	int list_length = 1;
 	int option, ID, signal;
 
 	while (1) {

@@ -100,11 +100,37 @@ void OUTPUT_printing_text(char c, int num) {
 }
 
 void OUTPUT_view_task(int id[], char list[][MAX_TITLE], int progress[], int list_length) {
-	if (!list_length) printf("\nNo task yet!");
+	if (!list_length) printf("\nNo task yet!\n");
 	else {
+		printf("\n");
+		OUTPUT_printing_text('=', 68); 
+		printf("\nID    PROGRESS   ");
+		OUTPUT_printing_text(' ', 22);
+		printf("TITLE\n");
+		OUTPUT_printing_text('-', 68);
 		for (int i = 0; i < list_length; i++) {
 			printf("\n[%d]%7d%% %5s%s", id[i], progress[i], " ", list[i]);
 		}
+		printf("\n");
+		OUTPUT_printing_text('=', 68); 
+		printf("\n");
+	}
+}
+
+void OUTPUT_search_task(int id[], char list[][MAX_TITLE], int progress[], int list_length) {
+	if (!list_length) printf("\nNo task yet!\n");
+	else {
+		char searching_title[MAX_TITLE];
+		scanf("%50[^\n]", searching_title);
+		while (getchar() != '\n');
+		int is_found = 0;
+		for (int i = 0; i < list_length; i++) {
+			if (strstr(list[i], searching_title) != NULL) {
+				printf("\n[%d]%7d%% %5s%s", id[i], progress[i], " ", list[i]);
+				is_found = 1;
+			}
+		}
+		if(is_found) printf("\nNo matching tasks found!");
 	}
 }
 
@@ -113,23 +139,14 @@ int main() {
 	char list[MAX_TASK][MAX_TITLE];
 	int progress[MAX_TASK];
 	int list_length = 0;
-	int option, ID, signal;
+	int option, ID, signal, is_searched;
 	system("clear"); 
 
 	while (1) {
-		if (!list_length) {
-			OUTPUT_view_task(id, list, progress, list_length);
+		if (is_searched) {
+			is_searched = 0;
 		} else {
-			printf("\n");
-			OUTPUT_printing_text('=', 68); 
-			printf("\nID    PROGRESS   ");
-			OUTPUT_printing_text(' ', 22);
-			printf("TITLE\n");
-			OUTPUT_printing_text('-', 68);
 			OUTPUT_view_task(id, list, progress, list_length);
-			printf("\n");
-			OUTPUT_printing_text('=', 68); 
-			printf("\n");
 		}
 
 		printf("\nTO DO LIST");

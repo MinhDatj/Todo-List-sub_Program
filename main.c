@@ -42,13 +42,13 @@ int INPUT_new_task(int id[], char list[][MAX_TITLE], int progress[], int *list_l
 	return ADDING_SUCCEEDED;
 }
 
-int INPUT_get_ID(int *list_length) {
+int INPUT_get_ID(int list_length) {
 	int is_valid = 0;
 	int id;
 	while (!is_valid) {
 		printf("\t\nYour task's ID: ");
 		scanf("%d", &id);
-		is_valid = (id >= 0 && id <= *list_length);
+		is_valid = (id >= 0 && id <= list_length);
 		if (is_valid) return id;
 	}
 }
@@ -106,7 +106,8 @@ int main() {
 		case 2:
 			break;
 		case 3:
-			
+			ID = INPUT_get_ID(list_length);
+			SYSTEM_delete_task(id, list, progress, &list_length, ID);
 			break;
 		case 4:
 			break;

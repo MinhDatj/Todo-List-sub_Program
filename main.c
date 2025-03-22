@@ -53,14 +53,28 @@ int INPUT_get_ID(int *list_length) {
 	}
 }
 
+int SYSTEM_delete_task(int id[], char list[][MAX_TITLE], int progress[], int *list_length, int ID) {
+	if (*list_length == MAX_TASK) return 0;
+
+	for (int i = ID - 1; i < *list_length; i++) {
+		id[i] = id[i + 1];
+		progress[i] = progress[i + 1];
+		strcpy(list[i], list[i + 1]);
+	}
+	(*list_length)--;
+	return DELETING_SUCCEEDED;
+}
+
 void OUTPUT_response(int signal) {
 	if (!signal) printf("\nFailed!");
 
 	switch (signal)
 	{
 	case 1:
-		printf("\nAdding task successfully!");
+		printf("\nAdded task successfully!");
 		break;
+	case 3:
+		printf("\nDeleted task successfully!");
 	}
 }
 

@@ -77,6 +77,28 @@ int SYSTEM_edit_task(char list[][MAX_TITLE], int progress[], int ID) {
 	return EDITED_SUCCEEDED;
 }
 
+void SYSTEM_shell_sort_task(int id[], char list[][MAX_TITLE], int progress[], int list_length) {
+	for (int gap = list_length / 2; gap > 0; gap /= 2) {
+		for (int i = gap; i < list_length; i += 1) {
+			int tmp_id = id[i];
+			int tmp_progress = progress[i];
+			char tmp_title[MAX_TITLE];
+			strcpy(tmp_title, list[i]);\
+
+			int j;
+			for (int j = i; j >= gap && progress[j - gap] > tmp_progress; j -= gap) {
+				progress[j] = progress[j - gap];
+				id[j] = id[j - gap];
+				strcpy(list[j], list[j - gap]);
+			}
+
+			progress[j] = tmp_progress;
+			id[j] = tmp_id;
+			strcpy(list[j], tmp_title);
+		}
+	}
+}
+
 void OUTPUT_response(int signal) {
 	if (!signal) printf("\nFailed!");
 	else {

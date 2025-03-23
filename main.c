@@ -117,21 +117,33 @@ void OUTPUT_view_task(int id[], char list[][MAX_TITLE], int progress[], int list
 	}
 }
 
-void OUTPUT_search_task(int id[], char list[][MAX_TITLE], int progress[], int list_length) {
+int OUTPUT_search_task(int id[], char list[][MAX_TITLE], int progress[], int list_length) {
+	int is_found = 0;
 	if (!list_length) printf("\nNo task yet!\n");
 	else {
 		char searching_title[MAX_TITLE];
+		printf("\tSearching title: ");
 		scanf("%50[^\n]", searching_title);
 		while (getchar() != '\n');
-		int is_found = 0;
+
+		OUTPUT_printing_text('=', 68); 
+		printf("\nID    PROGRESS   ");
+		OUTPUT_printing_text(' ', 22);
+		printf("TITLE\n");
+		OUTPUT_printing_text('-', 68);
+
 		for (int i = 0; i < list_length; i++) {
 			if (strstr(list[i], searching_title) != NULL) {
 				printf("\n[%d]%7d%% %5s%s", id[i], progress[i], " ", list[i]);
 				is_found = 1;
 			}
 		}
-		if(is_found) printf("\nNo matching tasks found!");
+
+		printf("\n");
+		OUTPUT_printing_text('=', 68);
+		printf("\n");
 	}
+	return is_found;
 }
 
 int main() {
@@ -139,22 +151,23 @@ int main() {
 	char list[MAX_TASK][MAX_TITLE];
 	int progress[MAX_TASK];
 	int list_length = 0;
-	int option, ID, signal, is_searched;
+	int option, ID, signal, is_searched = 0;
+	int first = 0;
 	system("clear"); 
 
 	while (1) {
-		if (is_searched) {
-			is_searched = 0;
-		} else {
+		if (!is_searched) {
+			system("clear"); 
 			OUTPUT_view_task(id, list, progress, list_length);
 		}
+		is_searched = 0;
 
 		printf("\nTO DO LIST");
 		printf("\nPlease select an option:");
 		printf("\n1. Add a task");
 		printf("\n2. Edit a task");
 		printf("\n3. Delete a task");
-		// printf("\n4. View all task");
+		printf("\n4. Search task");
 		printf("\n0. Exit");
 		printf("\n");
 
@@ -177,13 +190,21 @@ int main() {
 				signal = SYSTEM_delete_task(id, list, progress, &list_length, ID);
 				OUTPUT_response(signal);
 				break;
-			// case 4:
-			// 	OUTPUT_view_task(id, list, progress, list_length);
-			// 	break;
+			case 4:
+				is_searched = OUTPUT_search_task(id, list, progress, list_length);
+				first = 1;
+				if (is_searched) {
+					printf("\nPress ENTER to return to menu...");
+					while (getchar() != '\n');
+				} else {
+					printf("No matching task found!");
+					printf("\nPress ENTER to return to menu...");
+					while (getchar() != '\n');
+				}
+				break;
 			case 0:
 				system("clear");
 				return 0;	
 		}
-		system("clear"); 
 	}
 }

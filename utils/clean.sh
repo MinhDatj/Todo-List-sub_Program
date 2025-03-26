@@ -1,2 +1,2 @@
 #!/bin/bash
-rm main
+rm -rf build/

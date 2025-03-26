@@ -1,2 +1,4 @@
 #!/bin/bash
-gcc main.c -o main
+
+mkdir build
+gcc main.c -o build/main

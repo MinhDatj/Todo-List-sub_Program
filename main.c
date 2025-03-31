@@ -14,7 +14,7 @@ int INPUT_get_option(void);
 int INPUT_get_progress(void);
 int INPUT_new_task(int id[], char list[][MAX_TITLE], int progress[], int *list_length);
 int INPUT_get_ID(int list_length);
-int SYSTEM_delete_task(int id[], char list[][MAX_TITLE], int progress[], int *list_length, int ID);
+int SYSTEM_delete_task(char list[][MAX_TITLE], int progress[], int *list_length, int ID);
 int SYSTEM_edit_task(char list[][MAX_TITLE], int progress[], int ID);
 void SYSTEM_shell_sort_task(int id[], char list[][MAX_TITLE], int progress[], int list_length);
 void OUTPUT_response(int signal);
@@ -62,7 +62,7 @@ int main(void) {
 				break;
 			case 3:
 				ID = INPUT_get_ID(list_length);
-				signal = SYSTEM_delete_task(id, list, progress, &list_length, ID);
+				signal = SYSTEM_delete_task(list, progress, &list_length, ID);
 				OUTPUT_response(signal);
 				break;
 			case 4:
@@ -130,11 +130,10 @@ int INPUT_get_ID(int list_length) {
 	return id;
 }
 
-int SYSTEM_delete_task(int id[], char list[][MAX_TITLE], int progress[], int *list_length, int ID) {
+int SYSTEM_delete_task(char list[][MAX_TITLE], int progress[], int *list_length, int ID) {
 	if (*list_length == MAX_TASK) return 0;
 
 	for (int i = ID - 1; i < *list_length; i++) {
-		// id[i] = id[i + 1];
 		progress[i] = progress[i + 1];
 		strcpy(list[i], list[i + 1]);
 	}

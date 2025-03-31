@@ -10,6 +10,79 @@
 #define DELETING_SUCCEEDED 3
 #define SEARCHING_SUCCEDED 4
 
+int INPUT_get_option(void);
+int INPUT_get_progress(void);
+int INPUT_new_task(int id[], char list[][MAX_TITLE], int progress[], int *list_length);
+int INPUT_get_ID(int list_length);
+int SYSTEM_delete_task(int id[], char list[][MAX_TITLE], int progress[], int *list_length, int ID);
+int SYSTEM_edit_task(char list[][MAX_TITLE], int progress[], int ID);
+void SYSTEM_shell_sort_task(int id[], char list[][MAX_TITLE], int progress[], int list_length);
+void OUTPUT_response(int signal);
+void OUTPUT_printing_text(char c, int num);
+void OUTPUT_view_task(int id[], char list[][MAX_TITLE], int progress[], int list_length);
+int OUTPUT_search_task(int id[], char list[][MAX_TITLE], int progress[], int list_length);
+
+int main(void) {
+	int id[MAX_TASK];
+	char list[MAX_TASK][MAX_TITLE];
+	int progress[MAX_TASK];
+	int list_length = 0;
+	int option, ID, signal, is_searched = 0;
+	system("clear"); 
+
+	while (1) {
+		if (!is_searched) {
+			system("clear"); 
+			OUTPUT_view_task(id, list, progress, list_length);
+		}
+		is_searched = 0;
+
+		printf("\nTO DO LIST");
+		printf("\nPlease select an option:");
+		printf("\n1. Add a task");
+		printf("\n2. Edit a task");
+		printf("\n3. Delete a task");
+		printf("\n4. Search task");
+		printf("\n0. Exit");
+		printf("\n");
+
+		option = INPUT_get_option();
+		printf("Received option: %d", option);
+		printf("\n");
+
+		switch (option) {
+			case 1:
+				signal = INPUT_new_task(id, list, progress, &list_length);
+				OUTPUT_response(signal);
+				break;
+			case 2:
+				ID = INPUT_get_ID(list_length);
+				signal = SYSTEM_edit_task(list, progress, ID);
+				OUTPUT_response(signal);
+				break;
+			case 3:
+				ID = INPUT_get_ID(list_length);
+				signal = SYSTEM_delete_task(id, list, progress, &list_length, ID);
+				OUTPUT_response(signal);
+				break;
+			case 4:
+				is_searched = OUTPUT_search_task(id, list, progress, list_length);
+				if (is_searched) {
+					printf("\nPress ENTER to return to menu...");
+					while (getchar() != '\n');
+				} else {
+					printf("No matching task found!");
+					printf("\nPress ENTER to return to menu...");
+					while (getchar() != '\n');
+				}
+				break;
+			case 0:
+				system("clear");
+				return 0;	
+		}
+	}
+}
+
 int INPUT_get_option(void) {
 	int is_valid = 0;
 	int option;
@@ -18,8 +91,8 @@ int INPUT_get_option(void) {
 		scanf("%d", &option);
 		while (getchar() != '\n');
 		is_valid = (option >= 0 && option <= LAST_OPTION);
-		if (is_valid) return option;
 	}
+	return option;
 }
 
 int INPUT_get_progress(void) {
@@ -29,8 +102,8 @@ int INPUT_get_progress(void) {
 		printf("\tYour progress [0-100]: ");
 		scanf("%d", &progress);
 		is_valid = (progress >= 0 && progress <= 100);
-		if (is_valid) return progress;
 	}
+	return progress;
 }
 
 int INPUT_new_task(int id[], char list[][MAX_TITLE], int progress[], int *list_length) {
@@ -53,8 +126,8 @@ int INPUT_get_ID(int list_length) {
 		scanf("%d", &id);
 		while (getchar() != '\n');
 		is_valid = (id >= 0 && id <= list_length + 1);
-		if (is_valid) return id;
 	}
+	return id;
 }
 
 int SYSTEM_delete_task(int id[], char list[][MAX_TITLE], int progress[], int *list_length, int ID) {
@@ -83,10 +156,10 @@ void SYSTEM_shell_sort_task(int id[], char list[][MAX_TITLE], int progress[], in
 			int tmp_id = id[i];
 			int tmp_progress = progress[i];
 			char tmp_title[MAX_TITLE];
+			int j;
 			strcpy(tmp_title, list[i]);\
 
-			int j;
-			for (int j = i; j >= gap && progress[j - gap] > tmp_progress; j -= gap) {
+			for (j = i; j >= gap && progress[j - gap] > tmp_progress; j -= gap) {
 				progress[j] = progress[j - gap];
 				id[j] = id[j - gap];
 				strcpy(list[j], list[j - gap]);
@@ -166,67 +239,4 @@ int OUTPUT_search_task(int id[], char list[][MAX_TITLE], int progress[], int lis
 		printf("\n");
 	}
 	return is_found;
-}
-
-int main() {
-	int id[MAX_TASK];
-	char list[MAX_TASK][MAX_TITLE];
-	int progress[MAX_TASK];
-	int list_length = 0;
-	int option, ID, signal, is_searched = 0;
-	int first = 0;
-	system("clear"); 
-
-	while (1) {
-		if (!is_searched) {
-			system("clear"); 
-			OUTPUT_view_task(id, list, progress, list_length);
-		}
-		is_searched = 0;
-
-		printf("\nTO DO LIST");
-		printf("\nPlease select an option:");
-		printf("\n1. Add a task");
-		printf("\n2. Edit a task");
-		printf("\n3. Delete a task");
-		printf("\n4. Search task");
-		printf("\n0. Exit");
-		printf("\n");
-
-		option = INPUT_get_option();
-		printf("Received option: %d", option);
-		printf("\n");
-
-		switch (option) {
-			case 1:
-				signal = INPUT_new_task(id, list, progress, &list_length);
-				OUTPUT_response(signal);
-				break;
-			case 2:
-				ID = INPUT_get_ID(list_length);
-				signal = SYSTEM_edit_task(list, progress, ID);
-				OUTPUT_response(signal);
-				break;
-			case 3:
-				ID = INPUT_get_ID(list_length);
-				signal = SYSTEM_delete_task(id, list, progress, &list_length, ID);
-				OUTPUT_response(signal);
-				break;
-			case 4:
-				is_searched = OUTPUT_search_task(id, list, progress, list_length);
-				first = 1;
-				if (is_searched) {
-					printf("\nPress ENTER to return to menu...");
-					while (getchar() != '\n');
-				} else {
-					printf("No matching task found!");
-					printf("\nPress ENTER to return to menu...");
-					while (getchar() != '\n');
-				}
-				break;
-			case 0:
-				system("clear");
-				return 0;	
-		}
-	}
 }

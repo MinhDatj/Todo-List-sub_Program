@@ -4,7 +4,7 @@
 
 #define MAX_TITLE 51
 #define MAX_TASK 10
-#define LAST_OPTION 4
+#define LAST_OPTION 5
 #define ADDING_SUCCEEDED 1
 #define EDITED_SUCCEEDED 2
 #define DELETING_SUCCEEDED 3
@@ -20,7 +20,7 @@ void SYSTEM_shell_sort_task(int id[], char list[][MAX_TITLE], int progress[], in
 void OUTPUT_response(int signal);
 void OUTPUT_printing_text(char c, int num);
 void OUTPUT_print_tasks(int id[], char list[][MAX_TITLE], int progress[], int list_length);
-void OUTPUT_view_task(int id[], char list[][MAX_TITLE], int progress[], int list_length);
+void OUTPUT_view_task(int id[], char list[][MAX_TITLE], int progress[], int list_length, int display_mode);
 int OUTPUT_search_task(int id[], char list[][MAX_TITLE], int progress[], int list_length);
 
 int main(void) {
@@ -28,13 +28,15 @@ int main(void) {
 	char list[MAX_TASK][MAX_TITLE];
 	int progress[MAX_TASK];
 	int list_length = 0;
-	int option, ID, signal, is_searched = 0;
+	int option, ID, signal;
+	int is_searched = 0, display_mode = 0;
+
 	system("clear"); 
 
 	while (1) {
 		if (!is_searched) {
 			system("clear"); 
-			OUTPUT_view_task(id, list, progress, list_length);
+			OUTPUT_view_task(id, list, progress, list_length, display_mode);
 		}
 		is_searched = 0;
 
@@ -44,12 +46,13 @@ int main(void) {
 		printf("\n2. Edit a task");
 		printf("\n3. Delete a task");
 		printf("\n4. Search task");
+		if (!display_mode) printf("\n5. Switch to progress view");
+		else printf("\n5. Switch to ID view");
 		printf("\n0. Exit");
 		printf("\n");
 
 		option = INPUT_get_option();
-		printf("Received option: %d", option);
-		printf("\n");
+		printf("Received option: %d\n", option);
 
 		switch (option) {
 			case 1:
@@ -76,6 +79,9 @@ int main(void) {
 					printf("\nPress ENTER to return to menu...");
 					while (getchar() != '\n');
 				}
+				break;
+			case 5:
+				display_mode = 1 - display_mode;
 				break;
 			case 0:
 				system("clear");
@@ -209,40 +215,28 @@ void OUTPUT_print_tasks(int id[], char list[][MAX_TITLE], int progress[], int li
 	printf("\n");
 }
 
-void OUTPUT_view_task(int id[], char list[][MAX_TITLE], int progress[], int list_length) {
+void OUTPUT_view_task(int id[], char list[][MAX_TITLE], int progress[], int list_length, int display_mode) {
 	if (!list_length) printf("\nNo task yet!\n");
 	else {
-		int choice;
-		do {
-			printf("\nChoose display order:");
-			printf("\n1. Sort by ID");
-			printf("\n2. Sort by progress");
-			printf("\n0. Return to Menu");
-			printf("\n");
-			scanf("%d", &choice);
-			while (getchar() != '\n');
+		if (!display_mode) {
 			system("clear");
+			printf("\n=== Viewing by ID ===");
+			OUTPUT_print_tasks(id, list, progress, list_length);
+		} else {
+			int tmp_id[MAX_TASK], tmp_progress[MAX_TASK];
+			char tmp_list[MAX_TASK][MAX_TITLE];
 
-			if (choice == 1) {
-				printf("\nViewing by ID");
-				OUTPUT_print_tasks(id, list, progress, list_length);
+			for (int i = 0; i < list_length; i++) {
+				tmp_id[i] = id[i];
+				tmp_progress[i] = progress[i];
+				strcpy(tmp_list[i], list[i]);
 			}
-			
-			if (choice == 2) {
-				int tmp_id[MAX_TASK], tmp_progress[MAX_TASK];
-				char tmp_list[MAX_TASK][MAX_TITLE];
 
-				for (int i = 0; i < list_length; i++) {
-					tmp_id[i] = id[i];
-					tmp_progress[i] = progress[i];
-					strcpy(tmp_list[i], list[i]);
-				}
-
-				SYSTEM_shell_sort_task(tmp_id, tmp_list, tmp_progress, list_length);
-				printf("\nViewing by progress");
-				OUTPUT_print_tasks(tmp_id, tmp_list, tmp_progress, list_length);
-			}
-		} while (choice != 0);
+			system("clear");
+			SYSTEM_shell_sort_task(tmp_id, tmp_list, tmp_progress, list_length);
+			printf("\n=== Viewing by progress ===");
+			OUTPUT_print_tasks(tmp_id, tmp_list, tmp_progress, list_length);
+		}
 	}
 }
 

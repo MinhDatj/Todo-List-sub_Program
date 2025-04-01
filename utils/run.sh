@@ -1,2 +1,2 @@
 #!/bin/bash
-./build/main
+./build/datj_todolist_app

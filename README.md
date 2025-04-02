@@ -12,7 +12,7 @@ This program include serveral functions:
 + Searching task.
 + Viewing every tasks by completion progress.  
 
-![task_flow_diagram](docs/task_flow_diagram.drawio.png)
+![task_flow_diagram](docs/function_diagram.drawio.png)
 
 ## **3. Getting Started**
 ### **3.1. Prerequisites**

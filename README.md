@@ -17,17 +17,21 @@ This program include serveral functions:
 ## **3. Getting Started**
 ### **3.1. Prerequisites**
 Assuming you don't have any tools, then you will need:  
-+ Ubuntu (22.04.05 TLS)  
-+ Git  
-+ MinGW-w64  
++ OS: Ubuntu (Tested successfully on version 22.04.05 LTS)  
++ git  (Tested successfully on version 2.34.1)
++ gcc  (Tested successfully on version 11.4.0)  
 (You can check if your computer has had git and gcc compiler or not by using `git --version` & `gcc --version`)  
+If you haven't had any, first try to install Ubuntu, then type this command on Ubuntu to install the rest:  
+``` bash
+sudo apt install git build-essential
+```
 ### **3.2. Quick Start**
-These belowing steps only work on Ubuntu.
+These belowing steps have been tested successfully on Ubuntu.  
 **Step 1**: Clone this repository to your computer by using:  
  ```
  git clone https://github.com/MinhDatj/Todo-List-sub_Program.git
  ```   
-**Step 2**: If cloned succesfully, you will see a directory named "Todo-List-sub_Program" (use `ls`), go to that directory by using:  
+**Step 2**: If cloned successfully, you will see a directory named "Todo-List-sub_Program" (use `ls`), go to that directory by using:  
 ```
 cd Todo-List-sub_Program/
 ```  
@@ -37,7 +41,7 @@ After that, you should see yourself in `Todo-List-sub_Program` directory
 chmod +x utils/*.sh
 ```   
 If succeeded, use `ls -l`. You will see a "x" mark at the end of the characters series.  
-**Step 4**: To get the executable file, use:  
+**Step 4**: To build the program, use:  
 ```
 ./utils/build.sh
 ```  

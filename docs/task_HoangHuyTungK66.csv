@@ -1,23 +1,7 @@
 ID,Title,Detail,Status,Priority,Deadline
-"How to diffentiate task from task, recommend using numbers respectively
-Eg: 1; 2; 3; 4","What type is the task 
-Eg: Study; Household chores; Club","What is the task about 
-Eg: Doing calculus II homework, exercise 2.1-2.10","Task's progress in %
-Eg: 50%; 88%","How important is the task. Scale: 1-5, 1 - most important, 5 - least important
-Eg: 3","When will it be finished, only mm/dd/yyyy 
-Eg: 31/02/2025"
+"How to diffentiate task from task, recommend using numbers respectively. Eg: 1; 2; 3; 4",What type is the task. Eg: Study; Household chores; Club,"What is the task about. Eg: Doing calculus II homework, exercise 2.1-2.10",Task's progress in %. Eg: 50%; 88%,"How important is the task. Scale: 1-5, 1 - most important, 5 - least important. Eg: 3","When will it be finished, only mm/dd/yyyy. Eg: 31/02/2025"
 1,Household chores,Use the vacuum in the next room to clean this room,100%,5,5/2/2025
 2,Household chores,Gather dirty clothes and put them into the washing machine,80%,4,5/2/2025
 3,Household chores,Clean the steps with wet towel and wipe dry with another dry towel,100%,3,5/2/2025
 4,Feed the cat,"Feed the cat with cat food, make sure to not overfeed",0%,2,5/3/2025
 5,Refill gas,Refill gas for the motorbike for next week's endeavors,0%,1,5/4/2025
-,,,,,
-,,,,,
-,,,,,
-,,,,,
-,,,,,
-,,,,,
-,,,,,
-,,,,,
-,,,,,
-,,,,,

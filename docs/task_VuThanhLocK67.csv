@@ -1,23 +1,7 @@
 ID,Title,Detail,Status,Priority,Deadline
-"How to diffentiate task from task, recommend using numbers respectively
-Eg: 1; 2; 3; 4","What type is the task 
-Eg: Study; Household chores; Club","What is the task about 
-Eg: Doing calculus II homework, exercise 2.1-2.10","Task's progress in %
-Eg: 50%; 88%","How important is the task. Scale: 1-5, 1 - most important, 5 - least important
-Eg: 3","When will it be finished, only mm/dd/yyyy 
-Eg: 31/02/2025"
+"How to diffentiate task from task, recommend using numbers respectively. Eg: 1; 2; 3; 4",What type is the task. Eg: Study; Household chores; Club,"What is the task about. Eg: Doing calculus II homework, exercise 2.1-2.10",Task's progress in %. Eg: 50%; 88%,"How important is the task. Scale: 1-5, 1 - most important, 5 - least important. Eg: 3","When will it be finished, only mm/dd/yyyy. Eg: 31/02/2025"
 1,Study,Doing micro-processor homework,70%,5,5/8/2025
 2,Study,Self study TOEIC,40%,1,5/8/2025
 3,Project,Code Python to draw weights and output of layer Convolutiona,100%,2,5/1/2025
 4,Project,Review code Verilo,10%,1,5/12/2025
 5,Project,Code Uart APB,40%,2,5/10/2025
-,,,,,
-,,,,,
-,,,,,
-,,,,,
-,,,,,
-,,,,,
-,,,,,
-,,,,,
-,,,,,
-,,,,,

@@ -12,21 +12,25 @@
 
 int INPUT_get_option(void);
 int INPUT_get_progress(void);
-int INPUT_new_task(int id[], char list[][MAX_TITLE], int progress[], int *list_length);
+int INPUT_new_task(int id[], char detail[][MAX_TITLE], int status[], int *list_length);
 int INPUT_get_ID(int list_length);
-int SYSTEM_delete_task(char list[][MAX_TITLE], int progress[], int *list_length, int ID);
-int SYSTEM_edit_task(char list[][MAX_TITLE], int progress[], int ID);
-void SYSTEM_shell_sort_task(int id[], char list[][MAX_TITLE], int progress[], int list_length);
+int SYSTEM_delete_task(char detail[][MAX_TITLE], int status[], int *list_length, int ID);
+int SYSTEM_edit_task(char detail[][MAX_TITLE], int status[], int ID);
+void SYSTEM_shell_sort_task(int id[], char detail[][MAX_TITLE], int status[], int list_length);
 void OUTPUT_response(int signal);
 void OUTPUT_printing_text(char c, int num);
-void OUTPUT_print_tasks(int id[], char list[][MAX_TITLE], int progress[], int list_length);
-void OUTPUT_view_task(int id[], char list[][MAX_TITLE], int progress[], int list_length, int display_mode);
-int OUTPUT_search_task(int id[], char list[][MAX_TITLE], int progress[], int list_length);
+void OUTPUT_print_tasks(int id[], char detail[][MAX_TITLE], int status[], int list_length);
+void OUTPUT_view_task(int id[], char detail[][MAX_TITLE], int status[], int list_length, int display_mode);
+int OUTPUT_search_task(int id[], char detail[][MAX_TITLE], int status[], int list_length);
+
+typedef struct Task {
+	int id[MAX_TASK];
+	char detail[MAX_TASK][MAX_TITLE];
+	int status[MAX_TASK];
+} Task;
 
 int main(void) {
-	int id[MAX_TASK];
-	char list[MAX_TASK][MAX_TITLE];
-	int progress[MAX_TASK];
+	Task myTask;
 	int list_length = 0;
 	int option, ID, signal;
 	int is_searched = 0, display_mode = 0;
@@ -36,7 +40,7 @@ int main(void) {
 	while (1) {
 		if (!is_searched) {
 			system("clear"); 
-			OUTPUT_view_task(id, list, progress, list_length, display_mode);
+			OUTPUT_view_task(myTask.id, myTask.detail, myTask.status, list_length, display_mode);
 		}
 		is_searched = 0;
 
@@ -46,7 +50,7 @@ int main(void) {
 		printf("\n2. Edit a task");
 		printf("\n3. Delete a task");
 		printf("\n4. Search task");
-		if (!display_mode) printf("\n5. Switch to progress view");
+		if (!display_mode) printf("\n5. Switch to status view");
 		else printf("\n5. Switch to ID view");
 		printf("\n0. Exit");
 		printf("\n");
@@ -56,21 +60,21 @@ int main(void) {
 
 		switch (option) {
 			case 1:
-				signal = INPUT_new_task(id, list, progress, &list_length);
+				signal = INPUT_new_task(myTask.id, myTask.detail, myTask.status, &list_length);
 				OUTPUT_response(signal);
 				break;
 			case 2:
 				ID = INPUT_get_ID(list_length);
-				signal = SYSTEM_edit_task(list, progress, ID);
+				signal = SYSTEM_edit_task(myTask.detail, myTask.status, ID);
 				OUTPUT_response(signal);
 				break;
 			case 3:
 				ID = INPUT_get_ID(list_length);
-				signal = SYSTEM_delete_task(list, progress, &list_length, ID);
+				signal = SYSTEM_delete_task(myTask.detail, myTask.status, &list_length, ID);
 				OUTPUT_response(signal);
 				break;
 			case 4:
-				is_searched = OUTPUT_search_task(id, list, progress, list_length);
+				is_searched = OUTPUT_search_task(myTask.id, myTask.detail, myTask.status, list_length);
 				if (is_searched) {
 					printf("\nPress ENTER to return to menu...");
 					while (getchar() != '\n');
@@ -104,22 +108,22 @@ int INPUT_get_option(void) {
 
 int INPUT_get_progress(void) {
 	int is_valid = 0;
-	int progress;
+	int status;
 	while (!is_valid) {
-		printf("\tYour progress [0-100]: ");
-		scanf("%d", &progress);
-		is_valid = (progress >= 0 && progress <= 100);
+		printf("\tYour status [0-100]: ");
+		scanf("%d", &status);
+		is_valid = (status >= 0 && status <= 100);
 	}
-	return progress;
+	return status;
 }
 
-int INPUT_new_task(int id[], char list[][MAX_TITLE], int progress[], int *list_length) {
+int INPUT_new_task(int id[], char detail[][MAX_TITLE], int status[], int *list_length) {
 	if (*list_length == MAX_TASK) return 0;
 
 	printf("\tYour task: ");
-	scanf("%50[^\n]", list[*list_length]);
+	scanf("%50[^\n]", detail[*list_length]);
 	while (getchar() != '\n');
-	progress[*list_length] = INPUT_get_progress();
+	status[*list_length] = INPUT_get_progress();
 	id[*list_length] = *list_length + 1;
 	(*list_length)++;
 	return ADDING_SUCCEEDED;
@@ -137,43 +141,43 @@ int INPUT_get_ID(int list_length) {
 	return id;
 }
 
-int SYSTEM_delete_task(char list[][MAX_TITLE], int progress[], int *list_length, int ID) {
+int SYSTEM_delete_task(char detail[][MAX_TITLE], int status[], int *list_length, int ID) {
 	if (*list_length == MAX_TASK) return 0;
 
 	for (int i = ID - 1; i < *list_length; i++) {
-		progress[i] = progress[i + 1];
-		strcpy(list[i], list[i + 1]);
+		status[i] = status[i + 1];
+		strcpy(detail[i], detail[i + 1]);
 	}
 	(*list_length)--;
 	return DELETING_SUCCEEDED;
 }
 
-int SYSTEM_edit_task(char list[][MAX_TITLE], int progress[], int ID) {
+int SYSTEM_edit_task(char detail[][MAX_TITLE], int status[], int ID) {
 	printf("\tYour task: ");
-	scanf("%50[^\n]", list[ID - 1]);
+	scanf("%50[^\n]", detail[ID - 1]);
 	while (getchar() != '\n');
-	progress[ID - 1] = INPUT_get_progress();
+	status[ID - 1] = INPUT_get_progress();
 	return EDITED_SUCCEEDED;
 }
 
-void SYSTEM_shell_sort_task(int id[], char list[][MAX_TITLE], int progress[], int list_length) {
+void SYSTEM_shell_sort_task(int id[], char detail[][MAX_TITLE], int status[], int list_length) {
 	for (int gap = list_length / 2; gap > 0; gap /= 2) {
 		for (int i = gap; i < list_length; i++) {
 			int tmp_id = id[i];
-			int tmp_progress = progress[i];
+			int tmp_progress = status[i];
 			char tmp_title[MAX_TITLE];
 			int j;
-			strcpy(tmp_title, list[i]);
+			strcpy(tmp_title, detail[i]);
 
-			for (j = i; j >= gap && progress[j - gap] < tmp_progress; j -= gap) {
-				progress[j] = progress[j - gap];
+			for (j = i; j >= gap && status[j - gap] < tmp_progress; j -= gap) {
+				status[j] = status[j - gap];
 				id[j] = id[j - gap];
-				strcpy(list[j], list[j - gap]);
+				strcpy(detail[j], detail[j - gap]);
 			}
 
-			progress[j] = tmp_progress;
+			status[j] = tmp_progress;
 			id[j] = tmp_id;
-			strcpy(list[j], tmp_title);
+			strcpy(detail[j], tmp_title);
 		}
 	}
 }
@@ -200,7 +204,7 @@ void OUTPUT_printing_text(char c, int num) {
 	for (int i = 0; i < num; i++) printf("%c", c);
 }
 
-void OUTPUT_print_tasks(int id[], char list[][MAX_TITLE], int progress[], int list_length) {
+void OUTPUT_print_tasks(int id[], char detail[][MAX_TITLE], int status[], int list_length) {
 	printf("\n");
 	OUTPUT_printing_text('=', 68); 
 	printf("\nID    PROGRESS   ");
@@ -208,39 +212,39 @@ void OUTPUT_print_tasks(int id[], char list[][MAX_TITLE], int progress[], int li
 	printf("TITLE\n");
 	OUTPUT_printing_text('-', 68);
 	for (int i = 0; i < list_length; i++) {
-		printf("\n[%d]%7d%% %5s%s", id[i], progress[i], " ", list[i]);
+		printf("\n[%d]%7d%% %5s%s", id[i], status[i], " ", detail[i]);
 	}
 	printf("\n");
 	OUTPUT_printing_text('=', 68); 
 	printf("\n");
 }
 
-void OUTPUT_view_task(int id[], char list[][MAX_TITLE], int progress[], int list_length, int display_mode) {
+void OUTPUT_view_task(int id[], char detail[][MAX_TITLE], int status[], int list_length, int display_mode) {
 	if (!list_length) printf("\nNo task yet!\n");
 	else {
 		if (!display_mode) {
 			system("clear");
 			printf("\n=== Viewing by ID ===");
-			OUTPUT_print_tasks(id, list, progress, list_length);
+			OUTPUT_print_tasks(id, detail, status, list_length);
 		} else {
 			int tmp_id[MAX_TASK], tmp_progress[MAX_TASK];
 			char tmp_list[MAX_TASK][MAX_TITLE];
 
 			for (int i = 0; i < list_length; i++) {
 				tmp_id[i] = id[i];
-				tmp_progress[i] = progress[i];
-				strcpy(tmp_list[i], list[i]);
+				tmp_progress[i] = status[i];
+				strcpy(tmp_list[i], detail[i]);
 			}
 
 			system("clear");
 			SYSTEM_shell_sort_task(tmp_id, tmp_list, tmp_progress, list_length);
-			printf("\n=== Viewing by progress ===");
+			printf("\n=== Viewing by status ===");
 			OUTPUT_print_tasks(tmp_id, tmp_list, tmp_progress, list_length);
 		}
 	}
 }
 
-int OUTPUT_search_task(int id[], char list[][MAX_TITLE], int progress[], int list_length) {
+int OUTPUT_search_task(int id[], char detail[][MAX_TITLE], int status[], int list_length) {
 	int is_found = 0;
 	if (!list_length) printf("\nNo task yet!\n");
 	else {
@@ -256,8 +260,8 @@ int OUTPUT_search_task(int id[], char list[][MAX_TITLE], int progress[], int lis
 		OUTPUT_printing_text('-', 68);
 
 		for (int i = 0; i < list_length; i++) {
-			if (strstr(list[i], searching_title) != NULL) {
-				printf("\n[%d]%7d%% %5s%s", id[i], progress[i], " ", list[i]);
+			if (strstr(detail[i], searching_title) != NULL) {
+				printf("\n[%d]%7d%% %5s%s", id[i], status[i], " ", detail[i]);
 				is_found = 1;
 			}
 		}

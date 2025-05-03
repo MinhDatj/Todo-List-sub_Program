@@ -1,0 +1,23 @@
+ID,Title,Detail,Status,Priority,Deadline
+"How to diffentiate task from task, recommend using numbers respectively
+Eg: 1; 2; 3; 4","What type is the task 
+Eg: Study; Household chores; Club","What is the task about 
+Eg: Doing calculus II homework, exercise 2.1-2.10","Task's progress in %
+Eg: 50%; 88%","How important is the task. Scale: 1-5, 1 - most important, 5 - least important
+Eg: 3","When will it be finished, only mm/dd/yyyy 
+Eg: 31/02/2025"
+1,Household chores,Use the vacuum in the next room to clean this room,100%,5,5/2/2025
+2,Household chores,Gather dirty clothes and put them into the washing machine,80%,4,5/2/2025
+3,Household chores,Clean the steps with wet towel and wipe dry with another dry towel,100%,3,5/2/2025
+4,Feed the cat,"Feed the cat with cat food, make sure to not overfeed",0%,2,5/3/2025
+5,Refill gas,Refill gas for the motorbike for next week's endeavors,0%,1,5/4/2025
+6,Study,Doing micro-processor homework,70%,5,5/8/2025
+7,Study,Self study TOEIC,40%,1,5/8/2025
+8,Project,Code Python to draw weights and output of layer Convolutiona,100%,2,5/1/2025
+9,Project,Review code Verilo,10%,1,5/12/2025
+10,Project,Code Uart APB,40%,2,5/10/2025
+11,Study,Hoocne method test,50%,3,5/4/2025
+12,Household chores,"Cleaning house, washing clothes",0%,4,5/6/2025
+13,Lab,Make an report slide ,80%,2,5/13/2025
+14,Appointments,Hang out with friends,50%,5,5/6/2025
+15,Finance,Complete tax invoice,30%,2,5/10/2025

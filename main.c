@@ -30,6 +30,9 @@ void OUTPUT_print_tasks(int id[], char detail[][MAX_TITLE], int status[], int li
 void OUTPUT_view_task(int id[], char detail[][MAX_TITLE], int status[], int list_length, int display_mode);
 int OUTPUT_search_task(int id[], char detail[][MAX_TITLE], int status[], int list_length);
 
+int is_next_integer(const char* ptr);
+int is_detail_empty(const char* ptr);
+
 int main(void) {
 	Task myTask;
 	const char* file = "./data/task.csv";
@@ -97,40 +100,56 @@ int main(void) {
 	}
 }
 
+int is_next_integer(const char* ptr) {
+    int temp;
+    return sscanf(ptr, "%d", &temp) == 1;
+}
+
+int is_detail_empty(const char* ptr) {
+    char temp[2];
+    return (sscanf(ptr, "\"%1[^\"]\"", temp) != 1);
+}
 
 void INPUT_read_file(const char* file, Task *myTask, int *list_length) {
 	FILE* fptr = fopen(file, "r");
 	int count_line = 0;
-	char line[256];
-	char dump_line[450];
+	char line[512];
 	
 	if (!fptr) {
 		perror("Cannot open file");
 		return;
 	}
 
-	fgets(dump_line, sizeof(dump_line), fptr);
-	fgets(dump_line, sizeof(dump_line), fptr);
+	fgets(line, sizeof(line), fptr);
+	fgets(line, sizeof(line), fptr);
 	
 	while ((fgets(line, sizeof(line), fptr)) && count_line < MAX_TASK)
 	{
-		int id = 0, status = 0;
-		char dump[100], detail[MAX_TITLE];
+		char s[MAX_TITLE] = "";
+        int cur_pos_in_line = 0;
+        char* l_ptr = line;
+		cur_pos_in_line = 0;
 
-		// char* ptr = line;
+		if (is_next_integer(l_ptr)) {
+            sscanf(l_ptr, "%d,%*[^,],%n", &myTask->id[count_line], &cur_pos_in_line);
+            l_ptr += cur_pos_in_line;
+        } else {
+            myTask->id[count_line] = -1;
+            l_ptr = strchr(l_ptr, '\"');
+        }
 
-		sscanf(line, "%d,%[^,],\"%[^\"]\",%d%%,%s", &id, dump, detail, &status, dump);
+		if (sscanf(l_ptr, "\"%[^\"]\"%n", s, &cur_pos_in_line) == 1) {
+            strncpy(myTask->detail[count_line], s, MAX_TITLE - 1);
+            myTask->detail[count_line][MAX_TITLE - 1] = '\0';
+            l_ptr += cur_pos_in_line;
+        } else {
+            strcpy(myTask->detail[count_line], "\0");
+            l_ptr = strchr(l_ptr, ',');
+        }
 
-		myTask->id[count_line] = id;
-		strncpy(myTask->detail[count_line], detail, MAX_TITLE - 1);
-		myTask->detail[count_line][MAX_TITLE - 1] = '\0';
-		myTask->status[count_line] = status;
-
-		printf("Task %d:\n", count_line + 1);
-        printf("  ID     : %d\n", myTask->id[count_line]);
-        printf("  Detail : %s\n", myTask->detail[count_line]);
-        printf("  Status : %d%%\n", myTask->status[count_line]);
-        printf("\n");
+		if (sscanf(l_ptr, ",%d%%,", &myTask->status[count_line]) != 1) {
+            myTask->status[count_line] = -1;
+        }
 
 		count_line++;
 	}

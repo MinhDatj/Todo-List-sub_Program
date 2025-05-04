@@ -2,14 +2,21 @@
 #include <stdlib.h>
 #include <string.h>
 
-#define MAX_TITLE 51
-#define MAX_TASK 10
+#define MAX_TITLE 100
+#define MAX_TASK 20
 #define LAST_OPTION 5
 #define ADDING_SUCCEEDED 1
 #define EDITED_SUCCEEDED 2
 #define DELETING_SUCCEEDED 3
 #define SEARCHING_SUCCEDED 4
 
+typedef struct Task {
+	int id[MAX_TASK];
+	char detail[MAX_TASK][MAX_TITLE];
+	int status[MAX_TASK];
+} Task;
+
+void INPUT_read_file(const char* file, Task *myTask, int *list_length);
 int INPUT_get_option(void);
 int INPUT_get_progress(void);
 int INPUT_new_task(int id[], char detail[][MAX_TITLE], int status[], int *list_length);
@@ -23,20 +30,16 @@ void OUTPUT_print_tasks(int id[], char detail[][MAX_TITLE], int status[], int li
 void OUTPUT_view_task(int id[], char detail[][MAX_TITLE], int status[], int list_length, int display_mode);
 int OUTPUT_search_task(int id[], char detail[][MAX_TITLE], int status[], int list_length);
 
-typedef struct Task {
-	int id[MAX_TASK];
-	char detail[MAX_TASK][MAX_TITLE];
-	int status[MAX_TASK];
-} Task;
-
 int main(void) {
 	Task myTask;
+	const char* file = "./data/task.csv";
 	int list_length = 0;
 	int option, ID, signal;
 	int is_searched = 0, display_mode = 0;
 
 	system("clear"); 
 
+	INPUT_read_file(file, &myTask, &list_length);
 	while (1) {
 		if (!is_searched) {
 			system("clear"); 
@@ -92,6 +95,48 @@ int main(void) {
 				return 0;	
 		}
 	}
+}
+
+
+void INPUT_read_file(const char* file, Task *myTask, int *list_length) {
+	FILE* fptr = fopen(file, "r");
+	int count_line = 0;
+	char line[256];
+	char dump_line[450];
+	
+	if (!fptr) {
+		perror("Cannot open file");
+		return;
+	}
+
+	fgets(dump_line, sizeof(dump_line), fptr);
+	fgets(dump_line, sizeof(dump_line), fptr);
+	
+	while ((fgets(line, sizeof(line), fptr)) && count_line < MAX_TASK)
+	{
+		int id = 0, status = 0;
+		char dump[100], detail[MAX_TITLE];
+
+		// char* ptr = line;
+
+		sscanf(line, "%d,%[^,],\"%[^\"]\",%d%%,%s", &id, dump, detail, &status, dump);
+
+		myTask->id[count_line] = id;
+		strncpy(myTask->detail[count_line], detail, MAX_TITLE - 1);
+		myTask->detail[count_line][MAX_TITLE - 1] = '\0';
+		myTask->status[count_line] = status;
+
+		printf("Task %d:\n", count_line + 1);
+        printf("  ID     : %d\n", myTask->id[count_line]);
+        printf("  Detail : %s\n", myTask->detail[count_line]);
+        printf("  Status : %d%%\n", myTask->status[count_line]);
+        printf("\n");
+
+		count_line++;
+	}
+	
+	*list_length = count_line;
+	fclose(fptr);
 }
 
 int INPUT_get_option(void) {
@@ -206,16 +251,16 @@ void OUTPUT_printing_text(char c, int num) {
 
 void OUTPUT_print_tasks(int id[], char detail[][MAX_TITLE], int status[], int list_length) {
 	printf("\n");
-	OUTPUT_printing_text('=', 68); 
+	OUTPUT_printing_text('=', 90); 
 	printf("\nID    PROGRESS   ");
 	OUTPUT_printing_text(' ', 22);
 	printf("TITLE\n");
-	OUTPUT_printing_text('-', 68);
+	OUTPUT_printing_text('-', 90);
 	for (int i = 0; i < list_length; i++) {
-		printf("\n[%d]%7d%% %5s%s", id[i], status[i], " ", detail[i]);
+		printf("\n[%2d]%7d%% %5s%s", id[i], status[i], " ", detail[i]);
 	}
 	printf("\n");
-	OUTPUT_printing_text('=', 68); 
+	OUTPUT_printing_text('=', 90); 
 	printf("\n");
 }
 

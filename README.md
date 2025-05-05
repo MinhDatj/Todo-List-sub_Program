@@ -1,6 +1,6 @@
 # **TO-DO LIST SUB_PROJECT**
 ## **1. Overview** 
-Short description: This is a simple console-based application written in C that allows users to create to-do list to manage their daily tasks.  
+Short description: This is a simple console-based application written in C that allows users to create to-do list to manage their daily tasks and all tasks will be saved to a csv file.  
 Goal: Manage daily tasks by creating a to-do list.  
 Objective: Improve C programming skill with static arrays & handling users input and output. Enhance console user interface skills.
 

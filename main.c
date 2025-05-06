@@ -24,7 +24,7 @@ int INPUT_get_ID(int list_length);
 int SYSTEM_delete_task(char detail[][MAX_TITLE], int status[], int *list_length, int ID);
 int SYSTEM_edit_task(char detail[][MAX_TITLE], int status[], int ID);
 void SYSTEM_shell_sort_task(int id[], char detail[][MAX_TITLE], int status[], int list_length);
-void SYSTEM_write_task_to_file(const char* w_file, Task *myTask, int count_line, int writing_mark);
+void SYSTEM_write_task_to_file(const char* w_file, Task *myTask, int count_line);
 void SYSTEM_edit_task_in_file(const char *file_name, int ID, const char *new_detail, int new_progress, int mode);
 void OUTPUT_response(int signal);
 void OUTPUT_printing_text(char c, int num);
@@ -40,12 +40,11 @@ int main(void) {
 	const char* file = "./data/task.csv";
 	const char* w_file = "./data/task.csv";
 	int list_length = 0, is_searched = 0, display_mode = 0;
-	int option, ID, signal, writing_mark;
+	int option, ID, signal;
 
 	system("clear"); 
 
 	INPUT_read_file(file, &myTask, &list_length);
-	writing_mark = list_length;
 	while (1) {
 		if (!is_searched) {
 			system("clear"); 
@@ -71,6 +70,7 @@ int main(void) {
 			case 1:
 				signal = INPUT_new_task(myTask.id, myTask.detail, myTask.status, &list_length);
 				OUTPUT_response(signal);
+				SYSTEM_write_task_to_file(w_file, &myTask, list_length);
 				break;
 			case 2:
 				ID = INPUT_get_ID(list_length);
@@ -100,7 +100,6 @@ int main(void) {
 				break;
 			case 0:
 				system("clear");
-				SYSTEM_write_task_to_file(w_file, &myTask, list_length, writing_mark);
 				return 0;	
 		}
 	}
@@ -223,10 +222,18 @@ int SYSTEM_delete_task(char detail[][MAX_TITLE], int status[], int *list_length,
 }
 
 int SYSTEM_edit_task(char detail[][MAX_TITLE], int status[], int ID) {
-	printf("\tYour task: ");
-	scanf("%50[^\n]", detail[ID - 1]);
-	while (getchar() != '\n');
+	char temp[MAX_TITLE];
+	
+	printf("\tYour new task [press Enter to skip]: ");
+	fgets(temp, sizeof(temp), stdin);
+	temp[strcspn(temp, "\n")] = 0;
+
+	if (strlen(temp) > 0) {
+		strcpy(detail[ID - 1], temp);
+	}
+
 	status[ID - 1] = INPUT_get_progress();
+
 	return EDITED_SUCCEEDED;
 }
 
@@ -252,7 +259,7 @@ void SYSTEM_shell_sort_task(int id[], char detail[][MAX_TITLE], int status[], in
 	}
 }
 
-void SYSTEM_write_task_to_file(const char* w_file, Task *myTask, int count_line, int writing_mark) {
+void SYSTEM_write_task_to_file(const char* w_file, Task *myTask, int list_length) {
     FILE* fptr = fopen(w_file, "a");
 
     if (!fptr) {
@@ -260,9 +267,9 @@ void SYSTEM_write_task_to_file(const char* w_file, Task *myTask, int count_line,
         return;
     }
 
-    for (int i = writing_mark; i < count_line; i++) {
-        fprintf(fptr, "%d, ,\"%s\",%d%%,,\n", myTask->id[i], myTask->detail[i], myTask->status[i]);
-    }
+	list_length--;
+    fprintf(fptr, "%d, ,\"%s\",%d%%, , \n", myTask->id[list_length], myTask->detail[list_length], myTask->status[list_length]);
+
     fclose(fptr);
 }
 
@@ -278,10 +285,9 @@ void SYSTEM_edit_task_in_file(const char *file_name, int ID, const char *new_det
 		while (fgets(line, sizeof(line), original)) {
 			if (current_line == (ID + 1)) {
 				char title[50];
-				char deadline[15];
-				int priority;
-				sscanf(line, "%*d,%[^,],\"%*[^\"]\",%*d%%,%d,%s", title, &priority, deadline);
-				fprintf(temp, "%d,%s,\"%s\",%d%%,%d,%s\n", ID, title, new_detail, new_progress, priority, deadline);
+				char the_rest[15];
+				sscanf(line, "%*d,%[^,],\"%*[^\"]\",%*d%%,%s", title, the_rest);
+				fprintf(temp, "%d,%s,\"%s\",%d%%,%s\n", ID, title, new_detail, new_progress, the_rest);
 			} else {
 				fputs(line, temp);
 			}

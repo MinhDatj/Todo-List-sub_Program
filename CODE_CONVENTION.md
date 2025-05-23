@@ -52,7 +52,7 @@ int valid;
 ## **🔹1.2 Naming functions**  
 - Use **`snake_case`** when naming functions.  
 - Name functions with a **verb or verb_noun** structure to describe what the function does.
-- Prefix function names with the **module** they belong to, like: `input_`, `output_`, `file_`, `util_`, etc.
+- Prefix function names with the **module** they belong to, like: `input_`, `output_`, `file_`, `util_`, etc. (To make it simple, these 3 modules can be used: `input`, `output`, `system`)
 <details>
 <summary><strong>Example:</strong></summary>
 

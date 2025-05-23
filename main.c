@@ -2,53 +2,59 @@
 #include <stdlib.h>
 #include <string.h>
 
-#define MAX_TITLE 100
+#define MAX_DETAIL 128
 #define MAX_TASK 20
-#define LAST_OPTION 5
+#define TOTAL_OPTION 5
 #define ADDING_SUCCEEDED 1
-#define EDITED_SUCCEEDED 2
+#define EDITING_SUCCEEDED 2
 #define DELETING_SUCCEEDED 3
 #define SEARCHING_SUCCEDED 4
 
-typedef struct Task {
+typedef struct task {
 	int id[MAX_TASK];
-	char detail[MAX_TASK][MAX_TITLE];
+	char detail[MAX_TASK][MAX_DETAIL];
 	int status[MAX_TASK];
-} Task;
+} task;
 
-void INPUT_read_file(const char* file, Task *myTask, int *list_length);
-int INPUT_get_option(void);
-int INPUT_get_progress(void);
-int INPUT_new_task(int id[], char detail[][MAX_TITLE], int status[], int *list_length);
-int INPUT_get_ID(int list_length);
-int SYSTEM_delete_task(char detail[][MAX_TITLE], int status[], int *list_length, int ID);
-int SYSTEM_edit_task(char detail[][MAX_TITLE], int status[], int ID);
-void SYSTEM_shell_sort_task(int id[], char detail[][MAX_TITLE], int status[], int list_length);
-void SYSTEM_write_task_to_file(const char* w_file, Task *myTask, int count_line);
-void SYSTEM_edit_task_in_file(const char *file_name, int ID, const char *new_detail, int new_progress, int mode);
-void OUTPUT_response(int signal);
-void OUTPUT_printing_text(char c, int num);
-void OUTPUT_print_tasks(int id[], char detail[][MAX_TITLE], int status[], int list_length);
-void OUTPUT_view_task(int id[], char detail[][MAX_TITLE], int status[], int list_length, int display_mode);
-int OUTPUT_search_task(int id[], char detail[][MAX_TITLE], int status[], int list_length);
+void file_read(const char* file_path, task *my_task, int *list_length);
+void file_write(const char* file_path, task *my_task, int line_count);
+void file_update_task(const char *file_name, int id, const char *new_detail, int new_status, int mode);
 
-int is_next_integer(const char* ptr);
-int is_detail_empty(const char* ptr);
+int input_get_user_option(void);
+int input_get_task_status(void);
+int input_get_task_id(int list_length);
+int input_get_new_task(int id[], char detail[][MAX_DETAIL], int status[], int *list_length);
 
+int task_delete(char detail[][MAX_DETAIL], int status[], int *list_length, int id);
+int task_edit(char detail[][MAX_DETAIL], int status[], int id);
+void task_sort_by_status(int id[], char detail[][MAX_DETAIL], int status[], int list_length);
+
+void output_respond_to_user(int action_code);
+void output_print_multiple_times(char c, int num);
+void output_print_all_task(int id[], char detail[][MAX_DETAIL], int status[], int list_length);
+int output_search_task(int id[], char detail[][MAX_DETAIL], int status[], int list_length);
+
+void util_handle_view_mode(int id[], char detail[][MAX_DETAIL], int status[], int list_length, int display_mode);
+int util_is_next_integer(const char* ptr);
+
+/**
+ * @brief Everything run inside this function
+ * 
+ * @return 0 on successful program exit.
+ */
 int main(void) {
-	Task myTask;
-	const char* file = "./data/task.csv";
-	const char* w_file = "./data/task.csv";
+	task my_task;
+	const char* file_path = "./data/task.csv";
 	int list_length = 0, is_searched = 0, display_mode = 0;
-	int option, ID, signal;
+	int option, id, action_code;
 
 	system("clear"); 
 
-	INPUT_read_file(file, &myTask, &list_length);
+	file_read(file_path, &my_task, &list_length);
 	while (1) {
 		if (!is_searched) {
 			system("clear"); 
-			OUTPUT_view_task(myTask.id, myTask.detail, myTask.status, list_length, display_mode);
+			util_handle_view_mode(my_task.id, my_task.detail, my_task.status, list_length, display_mode);
 		}
 		is_searched = 0;
 
@@ -58,34 +64,36 @@ int main(void) {
 		printf("\n2. Edit a task");
 		printf("\n3. Delete a task");
 		printf("\n4. Search task");
-		if (!display_mode) printf("\n5. Switch to status view");
-		else printf("\n5. Switch to ID view");
+		if (!display_mode) 
+		    printf("\n5. Switch to status view");
+		else 
+		    printf("\n5. Switch to id view");
 		printf("\n0. Exit");
 		printf("\n");
 
-		option = INPUT_get_option();
+		option = input_get_user_option();
 		printf("Received option: %d\n", option);
 
 		switch (option) {
 			case 1:
-				signal = INPUT_new_task(myTask.id, myTask.detail, myTask.status, &list_length);
-				OUTPUT_response(signal);
-				SYSTEM_write_task_to_file(w_file, &myTask, list_length);
+				action_code = input_get_new_task(my_task.id, my_task.detail, my_task.status, &list_length);
+				output_respond_to_user(action_code);
+				file_write(file_path, &my_task, list_length);
 				break;
 			case 2:
-				ID = INPUT_get_ID(list_length);
-				signal = SYSTEM_edit_task(myTask.detail, myTask.status, ID);
-				OUTPUT_response(signal);
-				SYSTEM_edit_task_in_file(file, ID, myTask.detail[ID - 1], myTask.status[ID - 1], 1);
+				id = input_get_task_id(list_length);
+				action_code = task_edit(my_task.detail, my_task.status, id);
+				output_respond_to_user(action_code);
+				file_update_task(file_path, id, my_task.detail[id - 1], my_task.status[id - 1], 1);
 				break;
 			case 3:
-				ID = INPUT_get_ID(list_length);
-				signal = SYSTEM_delete_task(myTask.detail, myTask.status, &list_length, ID);
-				OUTPUT_response(signal);
-				SYSTEM_edit_task_in_file(file, ID, myTask.detail[ID - 1], myTask.status[ID - 1], 0);
+				id = input_get_task_id(list_length);
+				action_code = task_delete(my_task.detail, my_task.status, &list_length, id);
+				output_respond_to_user(action_code);
+				file_update_task(file_path, id, my_task.detail[id - 1], my_task.status[id - 1], 0);
 				break;
 			case 4:
-				is_searched = OUTPUT_search_task(myTask.id, myTask.detail, myTask.status, list_length);
+				is_searched = output_search_task(my_task.id, my_task.detail, my_task.status, list_length);
 				if (is_searched) {
 					printf("\nPress ENTER to return to menu...");
 					while (getchar() != '\n');
@@ -105,215 +113,333 @@ int main(void) {
 	}
 }
 
-int is_next_integer(const char* ptr) {
+/**
+ * @brief function check if the character in the data is an integer or not to read the task in the file
+ *
+ * @param ptr		Pointer to that character.
+ * @return 1 if it is an integer, 
+ *		   0 if it is not.
+ */
+int util_is_next_integer(const char* ptr) {
     int temp;
+	// if scanning succesfully, it means that character is an integer
     return sscanf(ptr, "%d", &temp) == 1;
 }
 
-int is_detail_empty(const char* ptr) {
-    char temp[2];
-    return (sscanf(ptr, "\"%1[^\"]\"", temp) != 1);
-}
-
-void INPUT_read_file(const char* file, Task *myTask, int *list_length) {
-	FILE* fptr = fopen(file, "r");
-	int count_line = 0;
+/**
+ * @brief function read all tasks from the file and turning them into data in the program.
+ *
+ * @param file_path		The path of the file containing data.
+ * @param my_task		Pointer to a task struct containing task data arrays.
+ * @param list_length	Pointer to the current number of tasks.
+ */
+void file_read(const char* file_path, task *my_task, int *list_length) {
+	FILE* file_pointer = fopen(file_path, "r");
+	int line_count = 0;
 	char line[512];
 	
-	if (!fptr) {
-		perror("Cannot open file");
+	if (!file_pointer) {
+		perror("Cannot open file_path");
 		return;
 	}
 
-	fgets(line, sizeof(line), fptr);
-	fgets(line, sizeof(line), fptr);
+	// skip two first line in the file
+	fgets(line, sizeof(line), file_pointer);
+	fgets(line, sizeof(line), file_pointer);
 	
-	while ((fgets(line, sizeof(line), fptr)) && count_line < MAX_TASK)
+	while ((fgets(line, sizeof(line), file_pointer)) && line_count < MAX_TASK)
 	{
-		char s[MAX_TITLE] = "";
-        int cur_pos_in_line = 0;
-        char* l_ptr = line;
-		cur_pos_in_line = 0;
+		char task_detail_buffer[MAX_DETAIL] = "";
+        int chars_consumed = 0;
+        char* line_pointer = line;
+		chars_consumed = 0;
 
-		if (is_next_integer(l_ptr)) {
-            sscanf(l_ptr, "%d,%*[^,],%n", &myTask->id[count_line], &cur_pos_in_line);
-            l_ptr += cur_pos_in_line;
+		/* Check if the id of a task is not missing then read normally,
+		else mark id value as -1 
+		*/
+		if (util_is_next_integer(line_pointer)) {
+            sscanf(line_pointer, "%d,%*[^,],%n", &my_task->id[line_count], &chars_consumed);
+            line_pointer += chars_consumed;  // Move the pointer forward
         } else {
-            myTask->id[count_line] = -1;
-            l_ptr = strchr(l_ptr, '\"');
+            my_task->id[line_count] = -1;
+            line_pointer = strchr(line_pointer, '\"');  // Move to the start of the detail
         }
 
-		if (sscanf(l_ptr, "\"%[^\"]\"%n", s, &cur_pos_in_line) == 1) {
-            strncpy(myTask->detail[count_line], s, MAX_TITLE - 1);
-            myTask->detail[count_line][MAX_TITLE - 1] = '\0';
-            l_ptr += cur_pos_in_line;
+		/* Read the detail string enclosed in double quotes & move the pointer to that position
+		if detail is empty, set detail of the task empty too
+		*/
+		if (sscanf(line_pointer, "\"%[^\"]\"%n", task_detail_buffer, &chars_consumed) == 1) {
+            strncpy(my_task->detail[line_count], task_detail_buffer, MAX_DETAIL - 1);
+            my_task->detail[line_count][MAX_DETAIL - 1] = '\0';  // Ensure null-termination
+            line_pointer += chars_consumed;  // Move the pointer forward
         } else {
-            strcpy(myTask->detail[count_line], "\0");
-            l_ptr = strchr(l_ptr, ',');
+            strcpy(my_task->detail[line_count], "\0");
+            line_pointer = strchr(line_pointer, ',');  // Move to the start of status data
         }
 
-		if (sscanf(l_ptr, ",%d%%,", &myTask->status[count_line]) != 1) {
-            myTask->status[count_line] = -1;
+		// Extract the task status. If status is empty, set the value to -1
+		if (sscanf(line_pointer, ",%d%%,", &my_task->status[line_count]) != 1) {
+            my_task->status[line_count] = -1;
         }
 
-		count_line++;
+		line_count++;
 	}
 	
-	*list_length = count_line;
-	fclose(fptr);
+	*list_length = line_count;
+	fclose(file_pointer);
 }
 
-int INPUT_get_option(void) {
+/**
+ * @brief the user's option from the menu and make sure the option is validating.
+ *
+ * @param void
+ * @return option	The selected menu option.
+ */
+int input_get_user_option(void) {
 	int is_valid = 0;
 	int option;
+
 	while (!is_valid) {
 		printf("Your option: ");
 		scanf("%d", &option);
 		while (getchar() != '\n');
-		is_valid = (option >= 0 && option <= LAST_OPTION);
+		// Make sure the option from the user stays in the range of the menu option
+		is_valid = (option >= 0 && option <= TOTAL_OPTION);
 	}
+
 	return option;
 }
 
-int INPUT_get_progress(void) {
+/**
+ * @brief the task's status from the user, status value must stays between 0 & 100
+ *
+ * @param void
+ * @return status	The status of that task as an integer.
+ */
+int input_get_task_status(void) {
 	int is_valid = 0;
 	int status;
+
 	while (!is_valid) {
 		printf("\tYour status [0-100]: ");
 		scanf("%d", &status);
+		// Make sure status value stay between 0 to 100 percent
 		is_valid = (status >= 0 && status <= 100);
 	}
+
 	return status;
 }
 
-int INPUT_new_task(int id[], char detail[][MAX_TITLE], int status[], int *list_length) {
+/**
+ * @brief function gets inputs from the user to create a new task. Including: task's status, detail. Increase task count by 1.
+ * 
+ * @param id 			Array storing task IDs.
+ * @param detail 		2D array storing task details.
+ * @param status		Array storing task statuses.
+ * @param list_length 	Pointer to the current number of tasks.
+ * @return ADDING_SUCCEEDED	if the new task is successfully added, 
+ *		   or 0 if the task list is full.
+ */
+int input_get_new_task(int id[], char detail[][MAX_DETAIL], int status[], int *list_length) {
 	if (*list_length == MAX_TASK) return 0;
 
+	// Scan for detail of new task
 	printf("\tYour task: ");
-	scanf("%50[^\n]", detail[*list_length]);
+	scanf("%127[^\n]", detail[*list_length]);
 	while (getchar() != '\n');
-	status[*list_length] = INPUT_get_progress();
+
+	// Scan for status of new task
+	status[*list_length] = input_get_task_status();
 	id[*list_length] = *list_length + 1;
+	// Increase the total tasks by 1
 	(*list_length)++;
+
 	return ADDING_SUCCEEDED;
 }
 
-int INPUT_get_ID(int list_length) {
+/**
+ * @brief function gets a task's id from the user and make sure that id exists.
+ *
+ * @param list_length 	Total number of tasks in the list.
+ * @return id			The id needed to get.
+ */
+int input_get_task_id(int list_length) {
 	int is_valid = 0;
 	int id;
+
 	while (!is_valid) {
-		printf("\n\tYour task's ID: ");
+		printf("\n\tYour task's id: ");
 		scanf("%d", &id);
 		while (getchar() != '\n');
+		// Make sure id value stay in range of the list length
 		is_valid = (id >= 0 && id <= list_length + 1);
 	}
+
 	return id;
 }
 
-int SYSTEM_delete_task(char detail[][MAX_TITLE], int status[], int *list_length, int ID) {
+/**
+ * @brief function delete a task by the user sending the task's id.
+ *
+ * @param detail		2D array storing task details.
+ * @param status		Array storing task statuses.
+ * @param list_length	Pointer to the current number of tasks.
+ * @param id			The id of the task 
+ * @return DELETING_SUCCEEDED	if the new task is successfully deleted,
+ * 		   or 0 if the task list is full.
+ */
+int task_delete(char detail[][MAX_DETAIL], int status[], int *list_length, int id) {
 	if (*list_length == MAX_TASK) return 0;
 
-	for (int i = ID - 1; i < *list_length; i++) {
+	// Move up all the tasks behind the deleted one 
+	for (int i = id - 1; i < *list_length; i++) {
 		status[i] = status[i + 1];
 		strcpy(detail[i], detail[i + 1]);
 	}
-	(*list_length)--;
+
+	(*list_length)--;  // Decrease total tasks by 1 
+
 	return DELETING_SUCCEEDED;
 }
 
-int SYSTEM_edit_task(char detail[][MAX_TITLE], int status[], int ID) {
-	char temp[MAX_TITLE];
+/**
+ * @brief function edit detail, status of a task by the user sending the task's id.
+ *
+ * @param detail		2D array to store task details.
+ * @param status		Array to store task statuses.
+ * @param id			The id of the task 
+ * @return EDITING_SUCCEEDED 	if the new task is successfully edited,
+ */
+int task_edit(char detail[][MAX_DETAIL], int status[], int id) {
+	char temp[MAX_DETAIL];
 	
+	// the user can press Enter to skip the detail-input part
 	printf("\tYour new task [press Enter to skip]: ");
 	fgets(temp, sizeof(temp), stdin);
 	temp[strcspn(temp, "\n")] = 0;
 
 	if (strlen(temp) > 0) {
-		strcpy(detail[ID - 1], temp);
+		strcpy(detail[id - 1], temp);
 	}
 
-	status[ID - 1] = INPUT_get_progress();
+	status[id - 1] = input_get_task_status();
 
-	return EDITED_SUCCEEDED;
+	return EDITING_SUCCEEDED;
 }
 
-void SYSTEM_shell_sort_task(int id[], char detail[][MAX_TITLE], int status[], int list_length) {
+/**
+ * @brief function sort and rearrange the task list by status using shell sort algorithm. Task with higher status will go on top.
+ *
+ * @param id 			Array storing task IDs.
+ * @param detail		2D array storing task details.
+ * @param status		Array storing task statuses.
+ * @param list_length	Total number of tasks in the list.
+ */
+void task_sort_by_status(int id[], char detail[][MAX_DETAIL], int status[], int list_length) {
 	for (int gap = list_length / 2; gap > 0; gap /= 2) {
 		for (int i = gap; i < list_length; i++) {
-			int tmp_id = id[i];
-			int tmp_progress = status[i];
-			char tmp_title[MAX_TITLE];
+			int id_buffer = id[i];
+			int status_buffer = status[i];
+			char detail_buffer[MAX_DETAIL];
 			int j;
-			strcpy(tmp_title, detail[i]);
+			strcpy(detail_buffer, detail[i]);
 
-			for (j = i; j >= gap && status[j - gap] < tmp_progress; j -= gap) {
+			for (j = i; j >= gap && status[j - gap] < status_buffer; j -= gap) {
 				status[j] = status[j - gap];
 				id[j] = id[j - gap];
 				strcpy(detail[j], detail[j - gap]);
 			}
 
-			status[j] = tmp_progress;
-			id[j] = tmp_id;
-			strcpy(detail[j], tmp_title);
+			status[j] = status_buffer;
+			id[j] = id_buffer;
+			strcpy(detail[j], detail_buffer);
 		}
 	}
 }
 
-void SYSTEM_write_task_to_file(const char* w_file, Task *myTask, int list_length) {
-    FILE* fptr = fopen(w_file, "a");
+/**
+ * @brief function appends the most recently added task to the file 
+ *
+ * @param file_path 	Path of the file to which the task will be writen.
+ * @param my_task		Pointer to a task struct containg task data.
+ * @param list_length 	Total number of tasks in the list.
+ */
+void file_write(const char* file_path, task *my_task, int list_length) {
+    FILE* file_pointer = fopen(file_path, "a");
 
-    if (!fptr) {
+    if (!file_pointer) {
         printf("File pointer is NULL.\n");
         return;
     }
 
 	list_length--;
-    fprintf(fptr, "%d, ,\"%s\",%d%%, , \n", myTask->id[list_length], myTask->detail[list_length], myTask->status[list_length]);
+    fprintf(file_pointer, "%d, ,\"%s\",%d%%, , \n", my_task->id[list_length], my_task->detail[list_length], my_task->status[list_length]);
 
-    fclose(fptr);
+    fclose(file_pointer);
 }
 
-void SYSTEM_edit_task_in_file(const char *file_name, int ID, const char *new_detail, int new_progress, int mode) {
-	//1 is edit, 0 is delete
-    FILE* original = fopen(file_name, "r");
-    FILE* temp = fopen("temp.csv", "w");
+/**
+ * @brief function either edits a task or delete a task in the file by using the task's id to determine which line to edit. 
+ *
+ * @param file_path 	Path of the file to which the task will be writen.
+ * @param id            ID of the task to edit or delete.
+ * @param new_detail	New detail of the task (only for edit).
+ * @param list_length	Pointer to the current number of tasks.
+ * @param new_status 	New status of the task (only for edit).
+ * @param mode			Operation mode: 1 is edit, 0 is delete.
+ */
+void file_update_task(const char *file_name, int id, const char *new_detail, int new_status, int mode) {
+    FILE* original_file = fopen(file_name, "r");
+    FILE* temp_file = fopen("temp.csv", "w");
 
     char line[512];
     int current_line = 0;
 
+	/*
+	If mode is 1: edits the task in the file.
+	If mode is 0: deletes the task in the file.
+	*/
 	if (mode) {
-		while (fgets(line, sizeof(line), original)) {
-			if (current_line == (ID + 1)) {
+		/* Read and rewrite every task to another file until the required task,
+		then write the edited one, and finish the rest.
+		*/
+		while (fgets(line, sizeof(line), original_file)) {
+			if (current_line == (id + 1)) {  // When it is on the required line correspond to the id
 				char title[50];
 				char the_rest[15];
 				sscanf(line, "%*d,%[^,],\"%*[^\"]\",%*d%%,%s", title, the_rest);
-				fprintf(temp, "%d,%s,\"%s\",%d%%,%s\n", ID, title, new_detail, new_progress, the_rest);
+				fprintf(temp_file, "%d,%s,\"%s\",%d%%,%s\n", id, title, new_detail, new_status, the_rest);
 			} else {
-				fputs(line, temp);
+				fputs(line, temp_file);
 			}
 			current_line++;
 		}
 	} else {
-		while (fgets(line, sizeof(line), original))
-		{
-			if (current_line != (ID + 1)) {
-				fputs(line, temp); 
+		/* */
+		while (fgets(line, sizeof(line), original_file)) {
+			if (current_line != (id + 1)) {
+				fputs(line, temp_file); 
 			}
 			current_line++;
 		}
 	}
 
-    fclose(original);
-    fclose(temp);
+    fclose(original_file);
+    fclose(temp_file);
 
-    remove(file_name);
-    rename("temp.csv", file_name);
+    remove(file_name);  // Delete the original file
+    rename("temp.csv", file_name);  // Rename the temp file to the original file
 }
 
-void OUTPUT_response(int signal) {
-	if (!signal) printf("\nFailed!");
+/**
+ * @brief function displays a response message to the user based on the task action performed.
+ * 
+ * @param action_code	A value representing the aaction result.
+ */
+void output_respond_to_user(int action_code) {
+	if (!action_code) printf("\nThe task list is full!");
 	else {
-		switch (signal)
+		switch (action_code)
 		{
 		case 1:
 			printf("\nTask added successfully!");
@@ -328,64 +454,102 @@ void OUTPUT_response(int signal) {
 	}
 }
 
-void OUTPUT_printing_text(char c, int num) {
-	for (int i = 0; i < num; i++) printf("%c", c);
+/**
+ * @brief function prints out a character multiple times.
+ *
+ * @param character		The character to print.
+ * @param num			The number of times to print the character.
+ */
+void output_print_multiple_times(char character, int num) {
+	for (int i = 0; i < num; i++) printf("%c", character);
 }
 
-void OUTPUT_print_tasks(int id[], char detail[][MAX_TITLE], int status[], int list_length) {
+/**
+ * @brief function prints the full list of tasks in a formatted table.
+ *
+ * @param id			Array storing task ids.
+ * @param detail		2D array storing task detials.
+ * @param status		Array storing task statuses.
+ * @param list_length	Total number of tasks in the list.
+ */
+void output_print_all_task(int id[], char detail[][MAX_DETAIL], int status[], int list_length) {
 	printf("\n");
-	OUTPUT_printing_text('=', 90); 
+	output_print_multiple_times('=', 90);  
 	printf("\nID    PROGRESS   ");
-	OUTPUT_printing_text(' ', 22);
+	output_print_multiple_times(' ', 22);  
 	printf("TITLE\n");
-	OUTPUT_printing_text('-', 90);
+	output_print_multiple_times('-', 90);
+
+	// Print every tasks in the list
 	for (int i = 0; i < list_length; i++) {
 		printf("\n[%2d]%7d%% %5s%s", id[i], status[i], " ", detail[i]);
 	}
+
 	printf("\n");
-	OUTPUT_printing_text('=', 90); 
+	output_print_multiple_times('=', 90); 
 	printf("\n");
 }
 
-void OUTPUT_view_task(int id[], char detail[][MAX_TITLE], int status[], int list_length, int display_mode) {
-	if (!list_length) printf("\nNo task yet!\n");
+/**
+ * @brief Handles task list display based on selected view mode (by ID or by status).
+ * 
+ * @param id 			Array of task ids.
+ * @param detail		2D array of task details.
+ * @param status		Array of task statuses.
+ * @param list_length	Total number of task in the lists.
+ * @param display_mode	0 for viewing by id, 1 for viewing by status.
+ */
+void util_handle_view_mode(int id[], char detail[][MAX_DETAIL], int status[], int list_length, int display_mode) {
+	if (!list_length) 
+		printf("\nNo task yet!\n");
 	else {
+		system("clear");
+
 		if (!display_mode) {
-			system("clear");
-			printf("\n=== Viewing by ID ===");
-			OUTPUT_print_tasks(id, detail, status, list_length);
+			printf("\n=== Viewing by id ===");
+			output_print_all_task(id, detail, status, list_length);
 		} else {
-			int tmp_id[MAX_TASK], tmp_progress[MAX_TASK];
-			char tmp_list[MAX_TASK][MAX_TITLE];
+			// Create all temporary array to store tasks sorted by status
+			int id_buffer[MAX_TASK], status_buffer[MAX_TASK];
+			char list_buffer[MAX_TASK][MAX_DETAIL];
 
 			for (int i = 0; i < list_length; i++) {
-				tmp_id[i] = id[i];
-				tmp_progress[i] = status[i];
-				strcpy(tmp_list[i], detail[i]);
+				id_buffer[i] = id[i];
+				status_buffer[i] = status[i];
+				strcpy(list_buffer[i], detail[i]);
 			}
 
-			system("clear");
-			SYSTEM_shell_sort_task(tmp_id, tmp_list, tmp_progress, list_length);
+			task_sort_by_status(id_buffer, list_buffer, status_buffer, list_length);
 			printf("\n=== Viewing by status ===");
-			OUTPUT_print_tasks(tmp_id, tmp_list, tmp_progress, list_length);
+			output_print_all_task(id_buffer, list_buffer, status_buffer, list_length);
 		}
 	}
 }
 
-int OUTPUT_search_task(int id[], char detail[][MAX_TITLE], int status[], int list_length) {
+/**
+ * @brief Searches and displays tasks that match a given title substring.
+ * 
+ * @param id            Array of task ids.
+ * @param detail        2D array of task details.
+ * @param status        Array of task statuses.
+ * @param list_length   The number of tasks in the list.
+ * @return              1 if a match is found, 0 otherwise.
+ */
+int output_search_task(int id[], char detail[][MAX_DETAIL], int status[], int list_length) {
 	int is_found = 0;
-	if (!list_length) printf("\nNo task yet!\n");
+	if (!list_length) 
+	    printf("\nNo task yet!\n");
 	else {
-		char searching_title[MAX_TITLE];
+		char searching_title[MAX_DETAIL];
 		printf("\tSearching title: ");
-		scanf("%50[^\n]", searching_title);
+		scanf("%127[^\n]", searching_title);
 		while (getchar() != '\n');
 
-		OUTPUT_printing_text('=', 68); 
+		output_print_multiple_times('=', 68); 
 		printf("\nID    PROGRESS   ");
-		OUTPUT_printing_text(' ', 22);
+		output_print_multiple_times(' ', 22);
 		printf("TITLE\n");
-		OUTPUT_printing_text('-', 68);
+		output_print_multiple_times('-', 68);
 
 		for (int i = 0; i < list_length; i++) {
 			if (strstr(detail[i], searching_title) != NULL) {
@@ -395,7 +559,7 @@ int OUTPUT_search_task(int id[], char detail[][MAX_TITLE], int status[], int lis
 		}
 
 		printf("\n");
-		OUTPUT_printing_text('=', 68);
+		output_print_multiple_times('=', 68);
 		printf("\n");
 	}
 	return is_found;

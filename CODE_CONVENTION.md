@@ -437,3 +437,30 @@ if(valid){
 - No empty line at the start of blocks.
 - Line length limit: 80 characters.
 - Do not use macros to define blocks.
+
+# **5. Using clang-format**
+-  **`clang-format`** is a tool that automatically formats your C/C++ code according to a set of style rules — making your code clean, consistent, and easy to read!
+## **5.1 Prerequisites**
+Assuming you have had all the tools mentioned in the **Prerequisites** section of [README prerequisites](README.md#31-prerequisites) 
+- Check if you have already had `clang-format`:
+```bash
+clang-format --version
+```
+- **If not**, use:
+```bash
+sudo apt install clang-format
+```
+
+## **5.2 Quick Start**
+These belowing step has been tested successfully on Ubuntu.  
+- To format **a single file**, use the command:
+```bash
+clang-format -i file_name.c
+```
+- To format **all files**, use the command:
+```bash
+clang-format -i *.c
+// or if you have header files
+clang-format -i *.c *.h 
+```
+**NOTE**: It is recommended to **run `clang-format` before each commit** to ensure consistent formatting.
